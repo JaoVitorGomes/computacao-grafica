@@ -22,6 +22,30 @@ let trackballControls = new TrackballControls(camera, renderer.domElement );
 material = setDefaultMaterial(); // create a basic material
 light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
 orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
+document.addEventListener('mousemove', onDocumentMouseMove);
+
+
+let mouseX = 0;
+let mouseY = 0;
+let targetX = 0;
+let targetY = 0;
+const windowHalfX = window.innerWidth / 2;
+const windowHalfY = window.innerHeight / 2;
+
+let aviao = Aviao();
+scene.add(aviao);
+
+
+let mesh = new THREE.Mesh(aviao, material);
+// position the cube
+mesh.position.set(0.0, 2.0, 0.0);
+// add the cube to the scene
+scene.add(mesh);
+
+// Show axes (parameter is size of each axis)
+let axesHelper1 = new THREE.AxesHelper(12);
+mesh.add(axesHelper1);
+
 
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
@@ -37,9 +61,7 @@ let angulo = THREE.MathUtils.degToRad(180);
 let plane = createGroundPlaneXZ(20, 20)
 scene.add(plane);
 
-let aviao = Aviao();
 
-scene.add(aviao);
 
 // Use this to show information onscreen
 let controls = new InfoBox();
@@ -75,9 +97,23 @@ render();
 //     folder.add(controls, 'onMoveObject').name(" RESET ");
 // }
 
+function mouseRotation() {
+    targetX = mouseX * .001;
+    targetY = mouseY * .001;
+    if (mesh) {
+       mesh.rotation.y -= 0.05 * (targetX + mesh.rotation.y);
+       mesh.rotation.x -= 0.05 * (targetY + mesh.rotation.x);
+    }
+ }
+ 
+ function onDocumentMouseMove(event) {
+    mouseX = (event.clientX - windowHalfX);
+    mouseY = (event.clientY - windowHalfY);
+ }
+
 function render()
 {
-
+    mouseRotation();
   requestAnimationFrame(render);
   renderer.render(scene, camera) // Render scene
 }
