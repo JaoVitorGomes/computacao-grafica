@@ -17,7 +17,7 @@ let anguloTotal = THREE.MathUtils.degToRad(180);
 var aviao = new THREE.Group();
         
 // Criando a fuselagem
-var fuselagemGeometry = new THREE.CylinderGeometry(0.8,1,6,32);
+var fuselagemGeometry = new THREE.CylinderGeometry(1,0.8,6,32);
 //new THREE.BoxGeometry(2, 0.5, 0.5);
 var fuselagemMaterial = setDefaultMaterial();
 var fuselagem = new THREE.Mesh(fuselagemGeometry, fuselagemMaterial);
@@ -30,22 +30,25 @@ aviao.add(fuselagem);
 var asaGeometry = new THREE.BoxGeometry(10, 0.8, 1.5);
 var asaMaterial = setDefaultMaterial();
 var asaDireita = new THREE.Mesh(asaGeometry, asaMaterial);
-asaDireita.position.set(0, 5, 1);
-aviao.add(asaDireita);
+asaDireita.position.set(0, 1.5, 0);
+asaDireita.rotateX(angulo);
+fuselagem.add(asaDireita);
 
 
 var finalGeometry = new THREE.BoxGeometry(3, 0.25, 0.5);
 var asaMaterial = setDefaultMaterial();
 var asaFinal = new THREE.Mesh(finalGeometry, asaMaterial);
-asaFinal.position.set(0, 5, -2.5);
-aviao.add(asaFinal);
+asaFinal.position.set(0, -2.5, 0);
+asaFinal.rotateX(angulo);
+fuselagem.add(asaFinal);
 
 var final2Geometry = new THREE.BoxGeometry(1, 0.25, 0.5);
 var asaMaterial = setDefaultMaterial();
 var asaFinal2 = new THREE.Mesh(final2Geometry, asaMaterial);
-asaFinal2.position.set(0, 6, -2.5);
+asaFinal2.position.set(0, -2.5, 1);
+asaFinal2.rotateX(angulo);
 asaFinal2.rotateZ(angulo);
-aviao.add(asaFinal2);
+fuselagem.add(asaFinal2);
 
 
         
@@ -58,6 +61,6 @@ aviao.add(asaFinal2);
 // aviao.position.set(0, 0, -2);
      
 // Adicionando o avião à cena
-aviao.rotateY(anguloTotal)
+// aviao.rotateY(anguloTotal)
 return aviao;
 }

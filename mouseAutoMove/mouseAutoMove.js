@@ -28,6 +28,7 @@ window.addEventListener('resize', function () { onWindowResize(camera, renderer)
 
 // create a cube
 let cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+console.log("teste: ",cubeGeometry);
 let mesh = new THREE.Mesh(cubeGeometry, material);
 // position the cube
 mesh.position.set(0.0, 2.0, 0.0);

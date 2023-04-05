@@ -32,27 +32,42 @@ let targetY = 0;
 const windowHalfX = window.innerWidth / 2;
 const windowHalfY = window.innerHeight / 2;
 
+let valueY = 0;
+let valueX = 0;
+
+
+let lookAtVec = new THREE.Vector3(0.0, 5, 0.0);
+let camPosition = new THREE.Vector3(0, 5, 30);
+let upVec = new THREE.Vector3(0.0, 0.0, 0.0);
+
+
+let virtualCamera = new THREE.PerspectiveCamera(45, 1.3, 1.0, 50.0);
+virtualCamera.position.copy(camPosition);
+virtualCamera.up.copy(upVec);
+virtualCamera.lookAt(lookAtVec);
+
+
+
+let axesHelper = new THREE.AxesHelper( 12 );
+scene.add( axesHelper );
+
+
 let aviao = Aviao();
 scene.add(aviao);
+console.log("aviao: ",aviao);
 
 
-let mesh = new THREE.Mesh(aviao, material);
-// position the cube
-mesh.position.set(0.0, 2.0, 0.0);
-// add the cube to the scene
-scene.add(mesh);
 
 // Show axes (parameter is size of each axis)
-let axesHelper1 = new THREE.AxesHelper(12);
-mesh.add(axesHelper1);
+// let axesHelper1 = new THREE.AxesHelper(12);
+// mesh.add(axesHelper1);
 
 
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
 // Show axes (parameter is size of each axis)
-let axesHelper = new THREE.AxesHelper( 12 );
-scene.add( axesHelper );
+
 
 // Adicionando o angulo do aviao inicial
 
@@ -61,6 +76,18 @@ let angulo = THREE.MathUtils.degToRad(180);
 let plane = createGroundPlaneXZ(20, 20)
 scene.add(plane);
 
+const lerpConfig = {
+   destination: new THREE.Vector3(targetX, targetY, -70),
+   alpha: 0.01,
+   angle: 0.0,
+   move: true
+}
+const lerpConfigCamera = {
+   destination: new THREE.Vector3(0,0, -40),
+   alpha: 0.01,
+   angle: 0.0,
+   move: true
+}
 
 
 // Use this to show information onscreen
@@ -100,20 +127,49 @@ render();
 function mouseRotation() {
     targetX = mouseX * .001;
     targetY = mouseY * .001;
-    if (mesh) {
-       mesh.rotation.y -= 0.05 * (targetX + mesh.rotation.y);
-       mesh.rotation.x -= 0.05 * (targetY + mesh.rotation.x);
+    if (aviao) {
+      aviao.rotation.y -= 0.05 * (targetX + aviao.rotation.y);
+      aviao.rotation.x -= 0.05 * (targetY + aviao.rotation.x);
+      aviao.rotation.z -= 0.05 * (targetX + aviao.rotation.z);
     }
  }
  
  function onDocumentMouseMove(event) {
     mouseX = (event.clientX - windowHalfX);
-    mouseY = (event.clientY - windowHalfY);
+    mouseY = (event.clientY - windowHalfY );
  }
+
+ function stopWhenCloseEnough(obj, quat) {
+   valueY = ((mouseY * (Math.tan(0.3926991) * 30)) / windowHalfY);
+   valueX = ((mouseX * (Math.tan(0.3926991) * 30)) / windowHalfX);
+
+   lerpConfig.destination.x = valueX;
+   lerpConfig.destination.y = valueY* (-1);
+
+   let maxDiff = 0.1;
+   let diffAngle = obj.quaternion.angleTo(quat)
+   let diffDist = obj.position.distanceTo(lerpConfig.destination)
+   if (diffAngle < maxDiff && diffDist < maxDiff) {
+      lerpConfig.move = false;
+   }
+}
+
 
 function render()
 {
-    mouseRotation();
+   if (lerpConfig.move) {
+      let rad = THREE.MathUtils.degToRad(lerpConfig.angle)
+      let quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rad);
+      aviao.position.lerp(lerpConfig.destination, lerpConfig.alpha);
+      virtualCamera.position.lerp(lerpConfigCamera.destination, lerpConfigCamera.alpha);
+      aviao.quaternion.slerp(quat, lerpConfig.alpha)
+      console.log("movimento slerp: ",lerpConfig.destination);
+      stopWhenCloseEnough(aviao, quat)
+      
+   }
+
+
+   mouseRotation();
   requestAnimationFrame(render);
-  renderer.render(scene, camera) // Render scene
+  renderer.render(scene, virtualCamera) // Render scene
 }
