@@ -80,13 +80,13 @@ const lerpConfig = {
    destination: new THREE.Vector3(targetX, targetY, -70),
    alpha: 0.01,
    angle: 0.0,
-   move: true
+   move: false
 }
 const lerpConfigCamera = {
    destination: new THREE.Vector3(0,0, -40),
    alpha: 0.01,
    angle: 0.0,
-   move: true
+   move: false
 }
 
 
