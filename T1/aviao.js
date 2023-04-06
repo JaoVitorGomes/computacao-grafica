@@ -13,7 +13,6 @@ import {initRenderer,
 export function Aviao(){
 
 let angulo = THREE.MathUtils.degToRad(-90);   
-let anguloTotal = THREE.MathUtils.degToRad(180);   
 var aviao = new THREE.Group();
         
 // Criando a fuselagem
@@ -21,7 +20,7 @@ var fuselagemGeometry = new THREE.CylinderGeometry(1,0.8,6,32);
 //new THREE.BoxGeometry(2, 0.5, 0.5);
 var fuselagemMaterial = setDefaultMaterial();
 var fuselagem = new THREE.Mesh(fuselagemGeometry, fuselagemMaterial);
-fuselagem.position.set(0,5,0);
+fuselagem.position.set(0,10,0);
 
 fuselagem.rotateX(angulo);
 aviao.add(fuselagem);

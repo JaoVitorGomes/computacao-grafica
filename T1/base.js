@@ -29,6 +29,7 @@ let mouseX = 0;
 let mouseY = 0;
 let targetX = 0;
 let targetY = 0;
+let rad = 0;
 const windowHalfX = window.innerWidth / 2;
 const windowHalfY = window.innerHeight / 2;
 
@@ -36,17 +37,26 @@ let valueY = 0;
 let valueX = 0;
 
 
-let lookAtVec = new THREE.Vector3(0.0, 5, 0.0);
-let camPosition = new THREE.Vector3(0, 5, 30);
+let lookAtVec = new THREE.Vector3(0.0, 0.0, 0.0);
+let camPosition = new THREE.Vector3(0, 0.0, 0);
 let upVec = new THREE.Vector3(0.0, 0.0, 0.0);
 
+var cameratest = new THREE.Group();
+var cameramanGeometry = new THREE.BoxGeometry(1, 1, 1);
+var cameramanMaterial = setDefaultMaterial();
+var cameraman = new THREE.Mesh(cameramanGeometry, cameramanMaterial);
+cameraman.position.set(0,10,30);
+cameratest.add(cameraman);
+scene.add(cameraman);
 
 let virtualCamera = new THREE.PerspectiveCamera(45, 1.3, 1.0, 50.0);
 virtualCamera.position.copy(camPosition);
 virtualCamera.up.copy(upVec);
 virtualCamera.lookAt(lookAtVec);
 
+cameraman.add(virtualCamera);
 
+let anguloVisao = THREE.MathUtils.degToRad(45/2)
 
 let axesHelper = new THREE.AxesHelper( 12 );
 scene.add( axesHelper );
@@ -66,27 +76,23 @@ console.log("aviao: ",aviao);
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
-// Show axes (parameter is size of each axis)
 
 
-// Adicionando o angulo do aviao inicial
-
-let angulo = THREE.MathUtils.degToRad(180);   
 // create the ground plane
-let plane = createGroundPlaneXZ(20, 20)
+let plane = createGroundPlaneXZ(20, 2000)
 scene.add(plane);
 
 const lerpConfig = {
-   destination: new THREE.Vector3(targetX, targetY, -70),
-   alpha: 0.01,
+   destination: new THREE.Vector3(0, 0, -170),
+   alpha: 0.03,
    angle: 0.0,
-   move: false
+   move: true
 }
 const lerpConfigCamera = {
-   destination: new THREE.Vector3(0,0, -40),
-   alpha: 0.01,
+   destination: new THREE.Vector3(0,10, -140),
+   alpha: 0.03,
    angle: 0.0,
-   move: false
+   move: true
 }
 
 
@@ -127,10 +133,11 @@ render();
 function mouseRotation() {
     targetX = mouseX * .001;
     targetY = mouseY * .001;
+
     if (aviao) {
       aviao.rotation.y -= 0.05 * (targetX + aviao.rotation.y);
       aviao.rotation.x -= 0.05 * (targetY + aviao.rotation.x);
-      aviao.rotation.z -= 0.05 * (targetX + aviao.rotation.z);
+      //aviao.rotation.z -= 0.05 * (targetX * 1.5  + aviao.rotation.z);
     }
  }
  
@@ -139,32 +146,50 @@ function mouseRotation() {
     mouseY = (event.clientY - windowHalfY );
  }
 
- function stopWhenCloseEnough(obj, quat) {
-   valueY = ((mouseY * (Math.tan(0.3926991) * 30)) / windowHalfY);
-   valueX = ((mouseX * (Math.tan(0.3926991) * 30)) / windowHalfX);
+ function moveFlyer(obj, quat) {
+   valueY = ((mouseY * (Math.tan(anguloVisao) * 30)) / windowHalfY);
+   //valueX = ((mouseX * (Math.tan(anguloVisao) * 30)) / windowHalfX);
 
    lerpConfig.destination.x = valueX;
    lerpConfig.destination.y = valueY* (-1);
 
-   let maxDiff = 0.1;
-   let diffAngle = obj.quaternion.angleTo(quat)
+   console.log("aviao: ",obj.position.x);
+
+   //let diffAngle = obj.quaternion.angleTo(quat)
    let diffDist = obj.position.distanceTo(lerpConfig.destination)
-   if (diffAngle < maxDiff && diffDist < maxDiff) {
-      lerpConfig.move = false;
-   }
+   console.log("diffDist: ", diffDist)
 }
 
 
 function render()
 {
+   console.log("rotação aviao X: ",aviao.quaternion.x);
+   console.log("rotação aviao Y: ",aviao.quaternion.y)
+   console.log("rotação aviao Z: ",aviao.quaternion.z)
+
+   console.log("destino: ",aviao.position)
+
    if (lerpConfig.move) {
-      let rad = THREE.MathUtils.degToRad(lerpConfig.angle)
-      let quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rad);
+      valueX = ((mouseX * (Math.tan(anguloVisao) * 30)) / windowHalfX);
+      console.log("value aqui: ",valueY);
+
+      let diffDist1 = aviao.position.distanceTo(lerpConfig.destination)
+      let verifyAngle = 1;
+
+      if(valueX > aviao.position.x){verifyAngle = -1}
+      if(valueX == aviao.position.x){verifyAngle = 0 }
+      console.log("diferença de distancia: ",diffDist1)
+      
+      rad = THREE.MathUtils.degToRad(diffDist1 * verifyAngle * 4);
+      let quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), rad);
+
       aviao.position.lerp(lerpConfig.destination, lerpConfig.alpha);
-      virtualCamera.position.lerp(lerpConfigCamera.destination, lerpConfigCamera.alpha);
+      cameraman.position.lerp(lerpConfigCamera.destination, lerpConfigCamera.alpha);
+      console.log("valores dos angulos: ",rad, quat)
       aviao.quaternion.slerp(quat, lerpConfig.alpha)
       console.log("movimento slerp: ",lerpConfig.destination);
-      stopWhenCloseEnough(aviao, quat)
+
+      moveFlyer(aviao, quat)
       
    }
 
