@@ -24,7 +24,6 @@ light = initDefaultBasicLight(scene); // Create a basic light to illuminate the 
 orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
 document.addEventListener('mousemove', onDocumentMouseMove);
 
-
 let mouseX = 0;
 let mouseY = 0;
 let targetX = 0;
@@ -67,12 +66,6 @@ scene.add(aviao);
 console.log("aviao: ",aviao);
 
 
-
-// Show axes (parameter is size of each axis)
-// let axesHelper1 = new THREE.AxesHelper(12);
-// mesh.add(axesHelper1);
-
-
 // Listen window size changes
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 
@@ -98,37 +91,14 @@ const lerpConfigCamera = {
 
 // Use this to show information onscreen
 let controls = new InfoBox();
-  controls.add("Basic Scene");
+  controls.add("Trabalho 1");
   controls.addParagraph();
-  controls.add("Use mouse to interact:");
-  controls.add("* Left button to rotate");
-  controls.add("* Right button to translate (pan)");
-  controls.add("* Scroll to zoom in/out.");
+  controls.add("Use o mouse para mover o avião");
   controls.show();
 
 
 
-// buildInterface();
 render();
-
-// function buildInterface()
-// {     
-
-//   var controls = new function () {
-//     this.onMoveObject = function () {
-//     //   sphere.position.set(-5.0, 1.0, -5.0);
-//     //   sphere2.position.set(-5.0, 1.0, 5.0);
-//     };
-//  };
-
-
-//   let gui = new GUI();
-//   let folder = gui.addFolder("Opcoes");
-//     folder.open(); 
-//     folder.add(lerpConfig, "move",  true);
-//     folder.add(lerpConfig2, "move",  true);
-//     folder.add(controls, 'onMoveObject').name(" RESET ");
-// }
 
 function mouseRotation() {
     targetX = mouseX * .001;
@@ -137,62 +107,43 @@ function mouseRotation() {
     if (aviao) {
       aviao.rotation.y -= 0.05 * (targetX + aviao.rotation.y);
       aviao.rotation.x -= 0.05 * (targetY + aviao.rotation.x);
-      //aviao.rotation.z -= 0.05 * (targetX * 1.5  + aviao.rotation.z);
     }
  }
  
  function onDocumentMouseMove(event) {
     mouseX = (event.clientX - windowHalfX);
-    mouseY = (event.clientY - windowHalfY );
+    mouseY = (event.clientY - windowHalfY);
  }
 
- function moveFlyer(obj, quat) {
+ function moveFlyer(obj) {
    valueY = ((mouseY * (Math.tan(anguloVisao) * 30)) / windowHalfY);
-   //valueX = ((mouseX * (Math.tan(anguloVisao) * 30)) / windowHalfX);
+   valueX = ((mouseX * (Math.tan(anguloVisao) * 30)) / windowHalfX);
 
+   //let diffDist = aviao.position.distanceTo(lerpConfig.destination);
+   let verifyAngle = 1;
+   let diffDist =aviao.position.x - lerpConfig.destination.x ;
+
+   //if(valueX > obj.position.x){verifyAngle = -1}
+   //if(valueX == obj.position.x || diffDist > 24){verifyAngle = 0 }
+   
+   rad = THREE.MathUtils.degToRad(diffDist * verifyAngle * 4);
+   let quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), rad);
+
+   obj.position.lerp(lerpConfig.destination, lerpConfig.alpha);
+   cameraman.position.lerp(lerpConfigCamera.destination, lerpConfigCamera.alpha);
    lerpConfig.destination.x = valueX;
    lerpConfig.destination.y = valueY* (-1);
+   obj.quaternion.slerp(quat, lerpConfig.alpha)
 
-   console.log("aviao: ",obj.position.x);
 
-   //let diffAngle = obj.quaternion.angleTo(quat)
-   let diffDist = obj.position.distanceTo(lerpConfig.destination)
-   console.log("diffDist: ", diffDist)
 }
 
 
 function render()
 {
-   console.log("rotação aviao X: ",aviao.quaternion.x);
-   console.log("rotação aviao Y: ",aviao.quaternion.y)
-   console.log("rotação aviao Z: ",aviao.quaternion.z)
-
-   console.log("destino: ",aviao.position)
-
    if (lerpConfig.move) {
-      valueX = ((mouseX * (Math.tan(anguloVisao) * 30)) / windowHalfX);
-      console.log("value aqui: ",valueY);
-
-      let diffDist1 = aviao.position.distanceTo(lerpConfig.destination)
-      let verifyAngle = 1;
-
-      if(valueX > aviao.position.x){verifyAngle = -1}
-      if(valueX == aviao.position.x){verifyAngle = 0 }
-      console.log("diferença de distancia: ",diffDist1)
-      
-      rad = THREE.MathUtils.degToRad(diffDist1 * verifyAngle * 4);
-      let quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), rad);
-
-      aviao.position.lerp(lerpConfig.destination, lerpConfig.alpha);
-      cameraman.position.lerp(lerpConfigCamera.destination, lerpConfigCamera.alpha);
-      console.log("valores dos angulos: ",rad, quat)
-      aviao.quaternion.slerp(quat, lerpConfig.alpha)
-      console.log("movimento slerp: ",lerpConfig.destination);
-
-      moveFlyer(aviao, quat)
-      
+      moveFlyer(aviao)
    }
-
 
    mouseRotation();
   requestAnimationFrame(render);
