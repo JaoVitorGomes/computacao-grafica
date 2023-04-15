@@ -105,7 +105,7 @@ export class Airplane extends THREE.Group {
 
   createSecondPropeller() {
     const secondPropellerGeometry = new THREE.SphereGeometry(0.5, 32, 16);
-    const secondPropellerMaterial = setDefaultMaterial("white");
+    const secondPropellerMaterial = setDefaultMaterial("black");
     const secondPropeller = new THREE.Mesh(
       secondPropellerGeometry,
       secondPropellerMaterial

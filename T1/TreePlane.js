@@ -1,15 +1,15 @@
 import * as THREE from "three";
-import { degreesToRadians } from "../libs/util/util.js";
+import {createGroundPlaneWired} from "../libs/util/util.js";
 import { Tree } from "./Tree.js";
 
 export class TreePlane extends THREE.Group {
   constructor(
     width = 60,
-    height = 2000,
+    height = 200,
     widthSegments = 10,
     heightSegments = 10,
     color = 0x56d837,
-    position = [0, -0.1, -1000]
+    position = [0, -0.1, -40]
   ) {
     super();
 
@@ -22,7 +22,7 @@ export class TreePlane extends THREE.Group {
       position
     );
 
-    this.trees = this.createTrees(position[2] - 1000);
+    this.trees = this.createTrees(position[2] - (height/2));
 
     this.add(this.ground);
     this.trees.map((tree) => {
@@ -31,7 +31,7 @@ export class TreePlane extends THREE.Group {
     this.matrixPosition = position;
   }
 
-  getRandomZ(startPos = -2000) {
+  getRandomZ(startPos = -60) {
     return Math.floor(Math.random() * (startPos / 3)) * 3;
   }
 
@@ -39,7 +39,7 @@ export class TreePlane extends THREE.Group {
     return Math.floor(Math.random() * (60 / 3)) * 3 - 30;
   }
 
-  generateXZPairs(maximumSize = 10, zStartPos = -2000) {
+  generateXZPairs(maximumSize = 10, zStartPos = -120) {
     const pairs = [];
     while (true) {
       const newPair = [this.getRandomX(), this.getRandomZ(zStartPos)];
@@ -60,8 +60,8 @@ export class TreePlane extends THREE.Group {
     return pairs;
   }
 
-  createTrees(zStartPos = -2000) {
-    const treePositions = this.generateXZPairs(100, zStartPos).map(([x, z]) => [
+  createTrees(zStartPos = -60) {
+    const treePositions = this.generateXZPairs(10, zStartPos).map(([x, z]) => [
       x,
       0.1,
       z,
@@ -76,30 +76,9 @@ export class TreePlane extends THREE.Group {
     widthSegments = 10,
     heightSegments = 10,
     color = "rgb(200,200,200)",
-    position = [0.0, -0.1, 0.0]
   ) {
-    const planeGeometry = new THREE.PlaneGeometry(
-      width,
-      height,
-      widthSegments,
-      heightSegments
-    );
 
-    const planeMaterial = new THREE.MeshLambertMaterial({
-      color,
-      side: THREE.DoubleSide,
-    });
-
-    const mat4 = new THREE.Matrix4(); // Aux mat4 matrix
-    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-
-    plane.receiveShadow = true;
-    // Rotate 90 in X and perform a small translation in Y
-    plane.matrixAutoUpdate = false;
-    plane.matrix.identity(); // resetting matrices
-    // Will execute R1 and then T1
-    plane.matrix.multiply(mat4.makeTranslation(...position)); // T1
-    plane.matrix.multiply(mat4.makeRotationX(degreesToRadians(-90))); // R1
+    let plane = createGroundPlaneWired(width,height,widthSegments,heightSegments, 0,color,color);
 
     return plane;
   }

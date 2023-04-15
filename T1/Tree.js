@@ -6,18 +6,19 @@ export class Tree extends THREE.Group {
     super();
 
     this.trunk = this.createTrunk(x, y, z);
-    this.firstLeaves = this.createLeaves(0, 0.6, 0);
-    this.secondLeaves = this.createLeaves(0, 0.9, 0);
+    this.firstLeaves = this.createLeaves(0, 2.4, 0);
+    this.secondLeaves = this.createLeaves(0, 3.6, 0);
 
     this.add(this.trunk);
     this.trunk.add(this.firstLeaves);
     this.trunk.add(this.secondLeaves);
 
     this.position.set(x, y, z);
+
   }
 
   createLeaves(x, y, z) {
-    const leavesGeometry = new THREE.ConeGeometry(0.4, 0.8, 80);
+    const leavesGeometry = new THREE.ConeGeometry(1.6, 3.2, 160);
     const leavesMaterial = new THREE.MeshPhongMaterial({
       color: 0x297a18,
     });
@@ -29,7 +30,7 @@ export class Tree extends THREE.Group {
   }
 
   createTrunk() {
-    const trunkGeometry = new CylinderGeometry(0.1, 0.1, 0.4);
+    const trunkGeometry = new CylinderGeometry(0.3, 0.3, 0.8);
 
     const trunkMaterial = new THREE.MeshPhongMaterial({
       color: 0x964b00,
@@ -44,4 +45,5 @@ export class Tree extends THREE.Group {
 
     return trunk;
   }
+
 }
