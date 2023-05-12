@@ -43,7 +43,7 @@ let asset = {
 let helper = new THREE.Box3Helper( asset.bb, 0xffff00 );
 scene.add( helper );
 
-loadGLBFile(asset, '../assets/objects/orca.glb', 3.0);
+loadGLBFile(asset, '../T2/aircraft.glb', 3.0);
 
 render();
 

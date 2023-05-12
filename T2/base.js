@@ -1,5 +1,5 @@
 import * as THREE from "three";
-
+import {GLTFLoader} from '../build/jsm/loaders/GLTFLoader.js';
 //Importando o airplane
 import { Airplane } from "./Airplane.js";
 
@@ -70,9 +70,43 @@ let airplane = new Airplane();
 scene.add(airplane);
 
 airplane;
+
+// teste
+let asset = {
+  object: null,
+  loaded: false,
+  bb: new THREE.Box3()
+}
+
+
+loadGLBFile(asset, '../T2/aircraft.glb', 3.0);
+
+
+function loadGLBFile(asset, file, desiredScale)
+{
+ let loader = new GLTFLoader( );
+ loader.load( file, function ( gltf ) {
+   let obj = gltf.scene;
+   obj.traverse( function ( child ) {
+     if ( child.isMesh ) {
+         child.castShadow = true;
+     }
+   });
+   obj = normalizeAndRescale(obj, desiredScale);
+   obj = fixPosition(obj);
+   obj.updateMatrixWorld( true )
+   scene.add ( obj );
+
+   // Store loaded gltf in our js object
+   asset.object = gltf.scene;
+   }, null, null);
+}
+
+
+// teste
 //airplane.material.opacity = 0.5;
 
-console.log("airplane: ", airplane);
+//console.log("airplane: ", airplane);
 
 // Listen window size changes
 window.addEventListener(
@@ -89,13 +123,13 @@ const lerpConfig = {
   destination: new THREE.Vector3(0, 0, -170),
   alpha: 0.03,
   angle: 0.0,
-  move: true,
+  move: false,
 };
 const lerpConfigCamera = {
   destination: new THREE.Vector3(0, 10, -140),
   alpha: 0.03,
   angle: 0.0,
-  move: true,
+  move: false,
 };
 
 // Use this to show information onscreen
