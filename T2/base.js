@@ -11,7 +11,10 @@ import {
   initDefaultBasicLight,
   setDefaultMaterial,
   InfoBox,
-  onWindowResize,
+  onWindowResize, 
+    SecondaryBox,
+    createGroundPlane, 
+    getMaxSize
 } from "../libs/util/util.js";
 import { TreePlane } from "./TreePlane.js";
 
@@ -67,10 +70,10 @@ cameraman.add(virtualCamera);
 let anguloVisaoY = THREE.MathUtils.degToRad(45 / 2);
 let anguloVisaoX = THREE.MathUtils.degToRad((45 * 1.5) / 2);
 
-let airplane = new Airplane();
-scene.add(airplane);
+//let airplane = new Airplane();
+//scene.add(airplane);
 
-airplane;
+
 
 // teste
 let asset = {
@@ -78,9 +81,8 @@ let asset = {
   loaded: false,
   bb: new THREE.Box3()
 }
-
-
-loadGLBFile(asset, '../T2/aircraft.glb', 3.0);
+ 
+loadGLBFile(asset, '../T2/aircraft.glb', 7.0);
 
 
 function loadGLBFile(asset, file, desiredScale)
@@ -95,21 +97,39 @@ function loadGLBFile(asset, file, desiredScale)
    });
    obj = normalizeAndRescale(obj, desiredScale);
    obj = fixPosition(obj);
-   obj.updateMatrixWorld( true )
+   obj.updateMatrixWorld( true );
+   obj.rotateY(THREE.MathUtils.degToRad(180));
+   obj.rotateX(THREE.MathUtils.degToRad(15));
+   obj.position.set(0,10,0)
+   //console.log("valor do obj: ",obj);
    scene.add ( obj );
 
    // Store loaded gltf in our js object
-   asset.object = gltf.scene;
+   asset.object = obj;
+
    }, null, null);
 }
 
+function normalizeAndRescale(obj, newScale)
+{
+  var scale = getMaxSize(obj); // Available in 'utils.js'
+  obj.scale.set(newScale * (1.0/scale),
+                newScale * (1.0/scale),
+                newScale * (1.0/scale));
+  return obj;
+}
 
-// teste
-//airplane.material.opacity = 0.5;
+function fixPosition(obj)
+{
+  // Fix position of the object over the ground plane
+  var box = new THREE.Box3().setFromObject( obj );
+  if(box.min.y > 0)
+    obj.translateY(-box.min.y);
+  else
+    obj.translateY(-1*box.min.y);
+  return obj;
+}
 
-//console.log("airplane: ", airplane);
-
-// Listen window size changes
 window.addEventListener(
   "resize",
   function () {
@@ -124,7 +144,7 @@ const lerpConfig = {
   destination: new THREE.Vector3(0, 0, -170),
   alpha: 0.03,
   angle: 0.0,
-  move: false,
+  move: true,
 };
 const lerpConfigCamera = {
   destination: new THREE.Vector3(0, 10, -140),
@@ -146,10 +166,10 @@ function mouseRotation() {
   targetX = mouseX * 0.001;
   targetY = mouseY * 0.001;
 
-  if (airplane) {
-    airplane.rotation.y -= 0.05 * (targetX + airplane.rotation.y);
-    airplane.rotation.x -= 0.05 * (targetY + airplane.rotation.x);
-  }
+  if (asset.object) {
+    //asset.object.rotation.y -= 0.05 * (targetX + asset.object.rotation.y);
+    //asset.object.rotation.x -= 0.05 * (targetY + asset.object.rotation.x);
+ }
 }
 
 function onDocumentMouseMove(event) {
@@ -180,7 +200,8 @@ function moveAirplane(obj) {
   valueX = (mouseX * (Math.tan(anguloVisaoX) * 30)) / windowHalfX;
 
   let verifyAngle = 1;
-  let diffDist = airplane.position.x - lerpConfig.destination.x;
+  console.log("valor do asset pbject",asset.object);
+  let diffDist = asset.object.position.x - lerpConfig.destination.x;
 
   rad = THREE.MathUtils.degToRad(diffDist * verifyAngle * 4);
   let quat = new THREE.Quaternion().setFromAxisAngle(
@@ -198,14 +219,18 @@ function moveAirplane(obj) {
 }
 
 function render() {
-  if (lerpConfig.move) {
-    moveAirplane(airplane);
+  if (asset.object !== null) {
+    if(lerpConfig.move){
+      moveAirplane(asset.object);
+    }
+    mouseRotation();  
   }
+  
+  //airplane.rotateSecondPropeller();
 
-  mouseRotation();
-  airplane.rotateSecondPropeller();
-
-  if (arrayPlane[1].position.z > airplane.position.z) {
+  if (arrayPlane[1].position.z > 
+    //airplane.position.z
+    arrayPlane[1].position.z) {
     plane = new TreePlane(60, 120);
     modifyArray(plane);
     arrayPlane[4] = plane;
