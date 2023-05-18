@@ -155,7 +155,7 @@ const lerpConfigCamera = {
 
 // Use this to show information onscreen
 let controls = new InfoBox();
-controls.add("Trabalho 1");
+controls.add("Trabalho 2");
 controls.addParagraph();
 controls.add("Use o mouse para mover o avião");
 controls.show();
@@ -201,11 +201,12 @@ function moveAirplane(obj) {
 
   let verifyAngle = 1;
   console.log("valor do asset pbject",asset.object);
-  let diffDist = asset.object.position.x - lerpConfig.destination.x;
+  let diffDist = 1;
+  //asset.object.position.x - lerpConfig.destination.x;
 
   rad = THREE.MathUtils.degToRad(diffDist * verifyAngle * 4);
   let quat = new THREE.Quaternion().setFromAxisAngle(
-    new THREE.Vector3(0, 0, 1),
+    new THREE.Vector3(0, 0, 0),
     rad
   );
 
@@ -215,7 +216,7 @@ function moveAirplane(obj) {
   lerpConfig.destination.y = valueY * -1;
   lerpConfig.destination.z -= 2;
   lerpConfigCamera.destination.z -= 2;
-  obj.quaternion.slerp(quat, lerpConfig.alpha);
+  //obj.quaternion.slerp(quat, lerpConfig.alpha);
 }
 
 function render() {
