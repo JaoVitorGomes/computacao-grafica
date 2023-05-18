@@ -73,9 +73,47 @@ let anguloVisaoX = THREE.MathUtils.degToRad((45 * 1.5) / 2);
 //let airplane = new Airplane();
 //scene.add(airplane);
 
+let raycaster = new THREE.Raycaster();
+
+// Enable layers to raycaster and camera (layer 0 is enabled by default)
+raycaster.layers.enable( 0 );
+raycaster.layers.enable( 1 );
+raycaster.layers.enable( 2 );            
+camera.layers.enable( 0 );
+camera.layers.enable( 1 );
+camera.layers.enable( 2 );
+
+// Create list of plane objects 
+let planeRay, planeGeometry, planeMaterial;
+
+function RaycasterPlane(){
+   planeGeometry = new THREE.PlaneGeometry(7, 7, 20, 20);
+   planeMaterial = new THREE.MeshLambertMaterial();
+   planeMaterial.side = THREE.DoubleSide;
+   planeMaterial.transparent = true;
+   planeMaterial.opacity = 0.8;
+   planeRay = new THREE.Mesh(planeGeometry, planeMaterial);
+   planeRay.set
+   scene.add(planeRay);
+
+// Change plane's layer, position and color
+let colors = ["red", "green", "blue", "white"];
+  planeRay.translateZ(-0*6 + 6); // change position
+  planeRay.position.set(lerpConfigCamera.destination.x,lerpConfigCamera.destination.y, lerpConfigCamera.destination.z);
+  planeRay.layers.set(0);  // change layer
+  //planeRay.material.color.set(colors[0]); // change color
 
 
-// teste
+
+// Object to represent the intersection point
+let intersectionSphere = new THREE.Mesh(
+   new THREE.SphereGeometry(.2, 30, 30, 0, Math.PI * 2, 0, Math.PI),
+   new THREE.MeshPhongMaterial({color:"orange", shininess:"200"}));
+scene.add(intersectionSphere);
+}
+
+
+// aircraft
 let asset = {
   object: null,
   loaded: false,
@@ -153,6 +191,7 @@ const lerpConfigCamera = {
   move: false,
 };
 
+RaycasterPlane();
 // Use this to show information onscreen
 let controls = new InfoBox();
 controls.add("Trabalho 2");
@@ -175,6 +214,33 @@ function mouseRotation() {
 function onDocumentMouseMove(event) {
   mouseX = event.clientX - windowHalfX;
   mouseY = event.clientY - windowHalfY;
+
+  intersectionSphere.visible = false;
+  // calculate pointer position in normalized device coordinates
+ // (-1 to +1) for both components
+  let pointer = new THREE.Vector2();
+  pointer.x =  (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // update the picking ray with the camera and pointer position
+  raycaster.setFromCamera(pointer, camera);
+  // calculate objects intersecting the picking ray
+  let intersects = raycaster.intersectObjects([planeRay]);
+  
+  // -- Find the selected objects ------------------------------
+  if (intersects.length > 0) // Check if there is a intersection
+  {      
+     let point = intersects[0].point; // Pick the point where interception occurrs
+     intersectionSphere.visible = true;
+     intersectionSphere.position.set(point.x, point.y, point.z); 
+
+        if(planeRay == intersects[0].object ) {
+           clearSelected(); // Removes emissive for all layers 
+           planeRay.material.emissive.setRGB(0.4, 0.4, 0.4);
+           showInterceptionCoords(point);
+        }
+  }
+
 }
 
 function createArrayPlane() {
@@ -219,9 +285,23 @@ function moveAirplane(obj) {
   //obj.quaternion.slerp(quat, lerpConfig.alpha);
 }
 
+
+function clearSelected() 
+{
+      planeRay.material.emissive.setRGB(0, 0, 0);
+}
+
+function showInterceptionCoords( point)
+{
+  valueX = point.x;
+  valueY = point.y;
+  console.log("valor do x: ",point.x, ", valor do y: ",point.y,", valor do z: ",point.z);
+
+}
+
 function render() {
   if (asset.object !== null) {
-    if(lerpConfig.move){
+    if(!lerpConfig.move){
       moveAirplane(asset.object);
     }
     mouseRotation();  
@@ -241,5 +321,5 @@ function render() {
     scene.add(arrayPlane[4]);
   }
   requestAnimationFrame(render);
-  renderer.render(scene, virtualCamera); // Render scene
+  renderer.render(scene, camera); // Render scene
 }
