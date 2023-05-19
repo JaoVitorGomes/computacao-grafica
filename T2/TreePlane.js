@@ -1,5 +1,9 @@
 import * as THREE from "three";
-import {createGroundPlaneWired} from "../libs/util/util.js";
+import {
+  createGroundPlane,
+  createGroundPlaneWired,
+  createGroundPlaneXZ,
+} from "../libs/util/util.js";
 import { Tree } from "./Tree.js";
 
 export class TreePlane extends THREE.Group {
@@ -22,7 +26,7 @@ export class TreePlane extends THREE.Group {
       position
     );
 
-    this.trees = this.createTrees(position[2] - (height/2));
+    this.trees = this.createTrees(position[2] - height / 2);
 
     this.add(this.ground);
     this.trees.map((tree) => {
@@ -75,10 +79,29 @@ export class TreePlane extends THREE.Group {
     height,
     widthSegments = 10,
     heightSegments = 10,
-    color = "rgb(200,200,200)",
+    color = "rgb(200,200,200)"
   ) {
+    // let plane = createGroundPlaneWired(
+    //   width,
+    //   height,
+    //   widthSegments,
+    //   heightSegments,
+    //   0,
+    //   color,
+    //   color
+    // );
 
-    let plane = createGroundPlaneWired(width,height,widthSegments,heightSegments, 0,color,color);
+    let plane = createGroundPlaneXZ(
+      width,
+      height,
+      widthSegments,
+      heightSegments,
+      0,
+      color,
+      color
+    );
+
+    console.log("PLANE -> ", plane);
 
     return plane;
   }

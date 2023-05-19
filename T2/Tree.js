@@ -14,7 +14,6 @@ export class Tree extends THREE.Group {
     this.trunk.add(this.secondLeaves);
 
     this.position.set(x, y, z);
-
   }
 
   createLeaves(x, y, z) {
@@ -45,5 +44,4 @@ export class Tree extends THREE.Group {
 
     return trunk;
   }
-
 }
