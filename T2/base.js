@@ -127,7 +127,6 @@ function RaycasterPlane(){
    scene.add(planeRay);
 
 // Change plane's layer, position and color
-let colors = ["red", "green", "blue", "white"];
   planeRay.translateZ(-0*6 + 6); // change position
   planeRay.position.set(0,5,0);
   planeRay.layers.set(0);  // change layer
@@ -221,18 +220,21 @@ RaycasterPlane();
 
 const blocker = document.getElementById('blocker');
 const instructions = document.getElementById('instructions');
+const body = document.getElementById('bodyId');
+
+window.addEventListener("click", (event) => {
+  start = true;
+  instructions.style.display = 'none';
+  blocker.style.display = 'none';
+  body.style.cursor = 'none';
+});
 
 window.addEventListener("keydown", (event) => {
-  if (event.key == "i") {
-    if(start){
+  if (event.key == "Escape") {
       start = false;
       blocker.style.display = 'block';
       instructions.style.display = '';
-    }else{
-      start = true;
-      instructions.style.display = 'none';
-      blocker.style.display = 'none';
-    }
+      body.style.cursor = 'auto';
   }
 });
 
