@@ -1,14 +1,11 @@
 import * as THREE from "three";
 import {GLTFLoader} from '../build/jsm/loaders/GLTFLoader.js';
-//Importando o airplane
-import { Airplane } from "./Airplane.js";
 
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import { TrackballControls } from "../build/jsm/controls/TrackballControls.js";
 import {
   initRenderer,
   initCamera,
-  initDefaultBasicLight,
   setDefaultMaterial,
   InfoBox,
   onWindowResize,
@@ -68,7 +65,8 @@ const windowHalfY = window.innerHeight / 2;
 
 let valueY = 10;
 let valueX = 0;
-let intersectionSphere = null;
+
+let mira = new THREE.Vector3(0, 10, 30);
 
 let arrayPlane = new Array();
 
@@ -82,6 +80,19 @@ var cameramanMaterial = setDefaultMaterial();
 var cameraman = new THREE.Mesh(cameramanGeometry, cameramanMaterial);
 
 
+const materiallinha = new THREE.LineBasicMaterial( { color: 0x0000ff,linewidth: 3 } );
+const points = [];
+points.push( new THREE.Vector3(-0.5, 0, 0 ) );
+points.push( new THREE.Vector3( 0.5, 0, 0 ) );
+points.push( new THREE.Vector3( 0.5, 1, 0 ) );
+points.push( new THREE.Vector3(-0.5, 1, 0 ) );
+points.push( new THREE.Vector3(-0.5, 0, 0 ) );
+
+const geometry = new THREE.BufferGeometry().setFromPoints( points );
+const line = new THREE.Line( geometry, materiallinha );
+line.position.set(mira.x,mira.y,mira.z)
+scene.add( line );
+
 cameraman.position.set(0, 10, 30);
 cameraman.visible = true;
 cameraGroup.add(cameraman);
@@ -93,6 +104,7 @@ virtualCamera.up.copy(upVec);
 virtualCamera.lookAt(lookAtVec);
 
 cameraman.add(virtualCamera);
+
 
 let raycaster = new THREE.Raycaster();
 
@@ -106,7 +118,7 @@ function RaycasterPlane(){
    planeGeometry = new THREE.PlaneGeometry(50, 50, 20, 20);
    planeMaterial = new THREE.MeshLambertMaterial();
    planeMaterial.side = THREE.DoubleSide;
-   planeMaterial.opacity =0.5;
+   planeMaterial.opacity = 0;
    planeMaterial.transparent = true;
 
    planeRay = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -119,13 +131,6 @@ let colors = ["red", "green", "blue", "white"];
   planeRay.layers.set(0);  // change layer
   //planeRay.material.color.set(colors[0]); // change color
 
-
-
-// Object to represent the intersection point
-intersectionSphere = new THREE.Mesh(
-   new THREE.SphereGeometry(.2, 30, 30, 0, Math.PI * 2, 0, Math.PI),
-   new THREE.MeshPhongMaterial({color:"orange", shininess:"200"}));
-scene.add(intersectionSphere);
 }
 
 
@@ -215,6 +220,8 @@ const lerpConfigPlaneRay = {
 };
 
 RaycasterPlane();
+
+
 function mouseRotation() {
   targetX = mouseX * 0.001;
   targetY = mouseY * 0.001;
@@ -241,7 +248,6 @@ function onDocumentMouseMove(event) {
   mouseX = event.clientX - windowHalfX;
   mouseY = event.clientY - windowHalfY;
 
-  //intersectionSphere.visible = false;
   // calculate pointer position in normalized device coordinates
  // (-1 to +1) for both components
   let pointer = new THREE.Vector2();
@@ -254,12 +260,10 @@ function onDocumentMouseMove(event) {
   let intersects = raycaster.intersectObjects([planeRay]);
   
   // -- Find the selected objects ------------------------------
-  if ((intersects.length > 0) && (intersectionSphere != null))  // Check if there is a intersection
+  if ((intersects.length > 0) && (line != null))  // Check if there is a intersection
   {      
      let point = intersects[0].point; // Pick the point where interception occurrs
-     intersectionSphere.visible = true;
-     intersectionSphere.position.set(point.x, point.y, point.z); 
-
+     mira.set(point.x, point.y-0.5, point.z)
         if(planeRay == intersects[0].object ) {
           valueX = point.x;
           valueY = point.y;
@@ -267,6 +271,8 @@ function onDocumentMouseMove(event) {
   }
 
 }
+
+
 
 function createArrayPlane() {
   let positionZ = -60;
@@ -304,7 +310,6 @@ function moveAirplane(obj) {
   lerpConfig.destination.z -= 2;
   lerpConfigCamera.destination.z -= 2;
   lerpConfigPlaneRay.destination.z -= 2;
-  //console.log("aviao: ",asset.object.position.z, " camera: ",cameraman.position.z);
   //obj.quaternion.slerp(quat, lerpConfig.alpha);
 }
 
@@ -313,12 +318,11 @@ function render() {
   if (asset.object !== null) {
     if(lerpConfig.move){
       moveAirplane(asset.object);
+      line.position.set(mira.x,mira.y,planeRay.position.z)
     }
     mouseRotation();
   
   
-  //airplane.rotateSecondPropeller();
-
   if (arrayPlane[1].position.z > asset.object.position.z) {
     plane = new TreePlane(60, 120);
     modifyArray(plane);
