@@ -11,10 +11,9 @@ import {
   initDefaultBasicLight,
   setDefaultMaterial,
   InfoBox,
-  onWindowResize, 
-    SecondaryBox,
-    createGroundPlane, 
-    getMaxSize
+  onWindowResize,
+  createLightSphere,
+  getMaxSize
 } from "../libs/util/util.js";
 import { TreePlane } from "./TreePlane.js";
 
@@ -28,9 +27,33 @@ renderer = initRenderer(); // Init a basic renderer
 camera = initCamera(new THREE.Vector3(0, 15, 30)); // Init camera in this position
 let trackballControls = new TrackballControls(camera, renderer.domElement);
 material = setDefaultMaterial(); // create a basic material
-light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
 orbit = new OrbitControls(camera, renderer.domElement); // Enable mouse rotation, pan, zoom etc.
 document.addEventListener("mousemove", onDocumentMouseMove);
+
+let lightPosition = new THREE.Vector3(2, 20, 1);
+
+// light = initDefaultBasicLight(scene, true, lightPosition, 8, 512, 0.1, 100);
+
+let lightSphere = createLightSphere(scene, 0.5, 10, 10, lightPosition);
+
+let dirLight = new THREE.DirectionalLight("whites", 2);
+dirLight.position.copy(lightPosition);
+
+// Shadow settings
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 512;
+dirLight.shadow.mapSize.height = 512;
+dirLight.shadow.camera.near = 1;
+dirLight.shadow.camera.far = 20;
+dirLight.shadow.camera.left = -5;
+dirLight.shadow.camera.right = 5;
+dirLight.shadow.camera.top = 5;
+dirLight.shadow.camera.bottom = -5;
+dirLight.name = "Direction Light";
+
+scene.add(dirLight);
+
+console.log("light -> ", light);
 
 let plane = 0;
 
@@ -306,5 +329,6 @@ function render() {
   }
 }
   requestAnimationFrame(render);
+  // renderer.render(scene, virtualCamera); // Render scene
   renderer.render(scene, virtualCamera); // Render scene
 }
