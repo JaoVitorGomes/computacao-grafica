@@ -57,6 +57,8 @@ let plane = 0;
 let targetX = 0;
 let targetY = 0;
 
+let start = false;
+
 let mouseX = 0;
 let mouseY = 0;
 let rad = 0;
@@ -130,9 +132,7 @@ let colors = ["red", "green", "blue", "white"];
   planeRay.position.set(0,5,0);
   planeRay.layers.set(0);  // change layer
   //planeRay.material.color.set(colors[0]); // change color
-
 }
-
 
 // aircraft
 let asset = {
@@ -158,14 +158,11 @@ function loadGLBFile(asset, file, desiredScale)
    obj = fixPosition(obj);
    obj.updateMatrixWorld( true );
    obj.rotateY(THREE.MathUtils.degToRad(180));
-   obj.rotateX(THREE.MathUtils.degToRad(15));
+   obj.rotateX(THREE.MathUtils.degToRad(12));
    obj.position.set(0,10,0)
    scene.add ( obj );
 
-   // Store loaded gltf in our js object
    asset.object = obj;
-   //console.log("rotação obj: ",obj.rotation.y);
-   //console.log("rotação asset",asset.object.rotation.y)
 
    }, null, null);
 }
@@ -222,13 +219,30 @@ const lerpConfigPlaneRay = {
 RaycasterPlane();
 
 
+const blocker = document.getElementById('blocker');
+const instructions = document.getElementById('instructions');
+
+window.addEventListener("keydown", (event) => {
+  if (event.key == "i") {
+    if(start){
+      start = false;
+      blocker.style.display = 'block';
+      instructions.style.display = '';
+    }else{
+      start = true;
+      instructions.style.display = 'none';
+      blocker.style.display = 'none';
+    }
+  }
+});
+
 function mouseRotation() {
   targetX = mouseX * 0.001;
   targetY = mouseY * 0.001;
   if (asset.object) {
-    console.log("valor do asset modificado: ", targetX, asset.object.rotation.y)
-    //asset.object.rotation.y -= 0.05 * (asset.object.rotation.y);
-    //asset.object.rotation.x -= 0.05 * (asset.object.rotation.x);
+    console.log("valor do asset modificado: ", THREE.MathUtils.degToRad(12), asset.object.rotation.y)
+    //asset.object.rotation.y -= 0.05 * (targetX + (-testeb + asset.object.rotation.y));
+    //asset.object.rotation.x -= 0.05 * (targetY + (-testea + asset.object.rotation.x));
     
     
   }
@@ -316,7 +330,7 @@ function moveAirplane(obj) {
 
 function render() {
   if (asset.object !== null) {
-    if(lerpConfig.move){
+    if(start){
       moveAirplane(asset.object);
       line.position.set(mira.x,mira.y,planeRay.position.z)
     }
