@@ -97,7 +97,8 @@ const line = new THREE.Line( geometry, materiallinha );
 line.position.set(mira.x,mira.y,mira.z)
 scene.add( line );
 
-cameraman.position.set(0, 10, 30);
+cameraman.position.set(0, 10, -30);
+cameraman.rotateY(THREE.MathUtils.degToRad(180));
 cameraman.visible = true;
 cameraGroup.add(cameraman);
 scene.add(cameraman);
@@ -157,7 +158,7 @@ function loadGLBFile(asset, file, desiredScale)
    obj = normalizeAndRescale(obj, desiredScale);
    obj = fixPosition(obj);
    obj.updateMatrixWorld( true );
-   obj.rotateY(THREE.MathUtils.degToRad(180));
+  // obj.rotateY(THREE.MathUtils.degToRad(180));
   // obj.rotateX(THREE.MathUtils.degToRad(12));
    obj.position.set(0,10,0)
    scene.add ( obj );
@@ -198,19 +199,19 @@ window.addEventListener(
 createArrayPlane();
 
 const lerpConfig = {
-  destination: new THREE.Vector3(0, 0, -170),
+  destination: new THREE.Vector3(0, 0, 170),
   alpha: 0.03,
   angle: 0.0,
   move: true,
 };
 const lerpConfigCamera = {
-  destination: new THREE.Vector3(0, 10, -140),
+  destination: new THREE.Vector3(0, 10, 140),
   alpha: 0.03,
   angle: 0.0,
   move: false,
 };
 const lerpConfigPlaneRay = {
-  destination: new THREE.Vector3(0, 5, -170),
+  destination: new THREE.Vector3(0, 5, 170),
   alpha: 0.03,
   angle: 0.0,
   move: false,
@@ -244,8 +245,8 @@ function mouseRotation() {
   targetY = mouseY * 0.001;
   if (asset.object && start) {
     console.log("valores: ", asset.object.rotation.x + (0.01 * (targetY - (teste - asset.object.rotation.x))));
-    asset.object.rotation.y += 0.1 * (targetX -  asset.object.rotation.y);
-    asset.object.rotation.x -= 0.1 * (targetY - asset.object.rotation.x);
+    asset.object.rotation.y -= 0.1 * (targetX + asset.object.rotation.y);
+    asset.object.rotation.x += 0.1 * (targetY - asset.object.rotation.x);
     
     
   }
@@ -293,12 +294,12 @@ function onDocumentMouseMove(event) {
 
 
 function createArrayPlane() {
-  let positionZ = -60;
+  let positionZ = +60;
   for (var i = 0; i < 5; i++) {
     arrayPlane[i] = new TreePlane(60, 120);
     arrayPlane[i].position.set(0, 0, positionZ);
     scene.add(arrayPlane[i]);
-    positionZ -= 120;
+    positionZ += 120;
   }
 }
 
@@ -325,9 +326,9 @@ function moveAirplane(obj) {
   planeRay.position.lerp(lerpConfigPlaneRay.destination, lerpConfigPlaneRay.alpha);
   lerpConfig.destination.x = valueX;
   lerpConfig.destination.y = valueY;
-  lerpConfig.destination.z -= 2;
-  lerpConfigCamera.destination.z -= 2;
-  lerpConfigPlaneRay.destination.z -= 2;
+  lerpConfig.destination.z += 2;
+  lerpConfigCamera.destination.z += 2;
+  lerpConfigPlaneRay.destination.z += 2;
   //obj.quaternion.slerp(quat, lerpConfig.alpha);
 }
 
@@ -341,11 +342,11 @@ function render() {
     mouseRotation();
   
   
-  if (arrayPlane[1].position.z > asset.object.position.z) {
+  if (arrayPlane[1].position.z < asset.object.position.z) {
     plane = new TreePlane(60, 120);
     modifyArray(plane);
     arrayPlane[4] = plane;
-    arrayPlane[4].position.set(0, 0, arrayPlane[3].position.z - 120);
+    arrayPlane[4].position.set(0, 0, arrayPlane[3].position.z + 120);
 
     scene.add(arrayPlane[4]);
   }
