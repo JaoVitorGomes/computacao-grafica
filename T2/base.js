@@ -50,7 +50,7 @@ dirLight.name = "Direction Light";
 
 scene.add(dirLight);
 
-console.log("light -> ", light);
+//console.log("light -> ", light);
 
 let plane = 0;
 
@@ -69,6 +69,8 @@ let valueY = 10;
 let valueX = 0;
 
 let mira = new THREE.Vector3(0, 10, 30);
+
+let teste = 0;
 
 let arrayPlane = new Array();
 
@@ -142,7 +144,6 @@ let asset = {
  
 loadGLBFile(asset, '../T2/aircraft.glb', 7.0);
 
-
 function loadGLBFile(asset, file, desiredScale)
 {
  let loader = new GLTFLoader( );
@@ -157,10 +158,10 @@ function loadGLBFile(asset, file, desiredScale)
    obj = fixPosition(obj);
    obj.updateMatrixWorld( true );
    obj.rotateY(THREE.MathUtils.degToRad(180));
-   obj.rotateX(THREE.MathUtils.degToRad(12));
+  // obj.rotateX(THREE.MathUtils.degToRad(12));
    obj.position.set(0,10,0)
    scene.add ( obj );
-
+   teste = obj.rotation.x
    asset.object = obj;
 
    }, null, null);
@@ -241,10 +242,10 @@ window.addEventListener("keydown", (event) => {
 function mouseRotation() {
   targetX = mouseX * 0.001;
   targetY = mouseY * 0.001;
-  if (asset.object) {
-    console.log("valor do asset modificado: ", THREE.MathUtils.degToRad(12), asset.object.rotation.y)
-    //asset.object.rotation.y -= 0.05 * (targetX + (-testeb + asset.object.rotation.y));
-    //asset.object.rotation.x -= 0.05 * (targetY + (-testea + asset.object.rotation.x));
+  if (asset.object && start) {
+    console.log("valores: ", asset.object.rotation.x + (0.01 * (targetY - (teste - asset.object.rotation.x))));
+    asset.object.rotation.y += 0.1 * (targetX -  asset.object.rotation.y);
+    asset.object.rotation.x -= 0.1 * (targetY - asset.object.rotation.x);
     
     
   }
@@ -255,6 +256,7 @@ let controls = new InfoBox();
 controls.add("Trabalho 2");
 controls.addParagraph();
 controls.add("Use o mouse para mover o avião");
+controls.add("Aperte ESC para parar");
 controls.show();
 
 render();
