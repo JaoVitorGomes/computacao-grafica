@@ -15,6 +15,11 @@ import {
   createLightSphere,
 } from "../libs/util/util.js";
 import { TreePlane } from "./TreePlane.js";
+import KeyboardState from "../libs/util/KeyboardState.js";
+import { Tree } from "./Tree.js";
+
+// To use the keyboard
+let keyboard = new KeyboardState();
 
 let scene, renderer, camera, material, light, orbit; // Initial variables
 scene = new THREE.Scene(); // Create main scene
@@ -29,9 +34,7 @@ material = setDefaultMaterial(); // create a basic material
 orbit = new OrbitControls(camera, renderer.domElement); // Enable mouse rotation, pan, zoom etc.
 document.addEventListener("mousemove", onDocumentMouseMove);
 
-let lightPosition = new THREE.Vector3(2, 20, 1);
-
-// light = initDefaultBasicLight(scene, true, lightPosition, 8, 512, 0.1, 100);
+let lightPosition = new THREE.Vector3(0.0, 25.0, -2.0);
 
 let lightSphere = createLightSphere(scene, 0.5, 10, 10, lightPosition);
 
@@ -40,19 +43,39 @@ dirLight.position.copy(lightPosition);
 
 // Shadow settings
 dirLight.castShadow = true;
-dirLight.shadow.mapSize.width = 512;
-dirLight.shadow.mapSize.height = 512;
-dirLight.shadow.camera.near = 1;
-dirLight.shadow.camera.far = 20;
-dirLight.shadow.camera.left = -5;
-dirLight.shadow.camera.right = 5;
-dirLight.shadow.camera.top = 5;
-dirLight.shadow.camera.bottom = -5;
+dirLight.shadow.mapSize.width = 8192;
+dirLight.shadow.mapSize.height = 8192;
+dirLight.shadow.camera.near = 0;
+dirLight.shadow.camera.far = 1024;
+dirLight.shadow.camera.left = -100;
+dirLight.shadow.camera.right = 100;
+dirLight.shadow.camera.top = 1024;
+dirLight.shadow.camera.bottom = -10;
 dirLight.name = "Direction Light";
 
 scene.add(dirLight);
 
-console.log("light -> ", light);
+// Create a target object for the light
+const target = new THREE.Object3D();
+scene.add(target);
+
+// Set the light's target
+dirLight.target = target;
+
+// Change the position of the target to change the direction of the light
+target.position.set(dirLight.position.x, 0, dirLight.position.z);
+
+// const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+//   lightPosition,
+//   dirLight.target.position,
+// ]);
+
+// const lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+// const line = new THREE.Line(lineGeometry, lineMaterial);
+// scene.add(line);
+
+console.log("dirLight -> ", dirLight);
 
 let plane = 0;
 
@@ -186,12 +209,87 @@ function moveAirplane(obj) {
   lerpConfig.destination.z -= 2;
   lerpConfigCamera.destination.z -= 2;
   obj.quaternion.slerp(quat, lerpConfig.alpha);
+
+  lightPosition.x = airplane.position.x;
+  lightPosition.z = airplane.position.z;
+
+  updateLightPosition(lightPosition.x, lightPosition.y, lightPosition.z);
+}
+
+function updateLightPosition(x, y, z) {
+  lightPosition.x = x;
+  lightPosition.y = y;
+  lightPosition.z = z;
+
+  dirLight.position.copy(lightPosition);
+  lightSphere.position.copy(lightPosition);
+
+  // line.geometry.setFromPoints([lightPosition, dirLight.target.position]);
+
+  target.position.set(dirLight.position.x, 0, dirLight.position.z);
+
+  console.log(
+    "Light Position: " +
+      lightPosition.x.toFixed(2) +
+      ", " +
+      lightPosition.y.toFixed(2) +
+      ", " +
+      lightPosition.z.toFixed(2)
+  );
+}
+
+function keyboardUpdate() {
+  keyboard.update();
+  if (keyboard.pressed("D")) {
+    updateLightPosition(
+      lightPosition.x + 0.5,
+      lightPosition.y,
+      lightPosition.z
+    );
+  }
+  if (keyboard.pressed("A")) {
+    updateLightPosition(
+      lightPosition.x - 0.5,
+      lightPosition.y,
+      lightPosition.z
+    );
+  }
+  if (keyboard.pressed("W")) {
+    updateLightPosition(
+      lightPosition.x,
+      lightPosition.y + 0.5,
+      lightPosition.z
+    );
+  }
+  if (keyboard.pressed("S")) {
+    updateLightPosition(
+      lightPosition.x,
+      lightPosition.y - 0.5,
+      lightPosition.z
+    );
+  }
+  if (keyboard.pressed("E")) {
+    updateLightPosition(
+      lightPosition.x,
+      lightPosition.y,
+      lightPosition.z - 0.5
+    );
+  }
+  if (keyboard.pressed("Q")) {
+    updateLightPosition(
+      lightPosition.x,
+      lightPosition.y,
+      lightPosition.z + 0.5
+    );
+  }
 }
 
 function render() {
-  // if (lerpConfig.move) {
-  //   moveAirplane(airplane);
-  // }
+  // keyboardUpdate();
+
+  if (lerpConfig.move) {
+    moveAirplane(airplane);
+  }
 
   mouseRotation();
   airplane.rotateSecondPropeller();
@@ -206,6 +304,6 @@ function render() {
     scene.add(arrayPlane[4]);
   }
   requestAnimationFrame(render);
-  // renderer.render(scene, virtualCamera); // Render scene
-  renderer.render(scene, camera); // Render scene
+  renderer.render(scene, virtualCamera); // Render scene
+  // renderer.render(scene, camera); // Render scene
 }

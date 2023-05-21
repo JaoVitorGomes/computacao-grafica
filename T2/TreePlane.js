@@ -67,7 +67,7 @@ export class TreePlane extends THREE.Group {
   createTrees(zStartPos = -60) {
     const treePositions = this.generateXZPairs(10, zStartPos).map(([x, z]) => [
       x,
-      0.1,
+      0.5,
       z,
     ]);
 
@@ -81,17 +81,7 @@ export class TreePlane extends THREE.Group {
     heightSegments = 10,
     color = "rgb(200,200,200)"
   ) {
-    // let plane = createGroundPlaneWired(
-    //   width,
-    //   height,
-    //   widthSegments,
-    //   heightSegments,
-    //   0,
-    //   color,
-    //   color
-    // );
-
-    let plane = createGroundPlaneXZ(
+    let plane = createGroundPlaneWired(
       width,
       height,
       widthSegments,
@@ -100,6 +90,16 @@ export class TreePlane extends THREE.Group {
       color,
       color
     );
+
+    // let plane = createGroundPlaneXZ(
+    //   width,
+    //   height,
+    //   widthSegments,
+    //   heightSegments,
+    //   0,
+    //   color,
+    //   color
+    // );
 
     console.log("PLANE -> ", plane);
 
