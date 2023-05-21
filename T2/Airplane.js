@@ -28,6 +28,7 @@ export class Airplane extends THREE.Group {
     const fuselageGeometry = new THREE.CylinderGeometry(0.95, 0.75, 6, 32);
     const fuselageMaterial = setDefaultMaterial("grey");
     const fuselage = new THREE.Mesh(fuselageGeometry, fuselageMaterial);
+    fuselage.castShadow = true;
 
     fuselage.position.set(0, 10, 0);
     fuselage.rotateX(angle);
@@ -39,6 +40,7 @@ export class Airplane extends THREE.Group {
     const mainWingsGeometry = new THREE.SphereGeometry(0.5, 32, 16);
     const mainWingsMaterial = setDefaultMaterial("DarkBlue");
     const mainWings = new THREE.Mesh(mainWingsGeometry, mainWingsMaterial);
+    mainWings.castShadow = true;
 
     mainWings.position.set(0, 1.5, 0);
     mainWings.rotateX(angle);
@@ -54,6 +56,7 @@ export class Airplane extends THREE.Group {
       verticalTailWingGeometry,
       verticalTailWingMaterial
     );
+    verticalTailWing.castShadow = true;
 
     verticalTailWing.position.set(0, -2.5, 0);
     verticalTailWing.rotateX(angle);
@@ -68,6 +71,7 @@ export class Airplane extends THREE.Group {
       horizontalTailWingsGeometry,
       horizontalTailWingsMaterial
     );
+    horizontalTailWings.castShadow = true;
     horizontalTailWings.position.set(0, -2.5, 1);
     horizontalTailWings.rotateX(angle);
     horizontalTailWings.rotateZ(angle);
@@ -79,6 +83,8 @@ export class Airplane extends THREE.Group {
     const cabinGeometry = new THREE.SphereGeometry(0.5, 32, 16);
     const cabinMaterial = setDefaultMaterial("DimGray");
     const cabin = new THREE.Mesh(cabinGeometry, cabinMaterial);
+    cabin.castShadow = true;
+
     cabin.rotateZ(angle);
     cabinGeometry.scale(2, 1, 1);
     cabin.position.set(0, 1.8, 0.8);
@@ -98,6 +104,7 @@ export class Airplane extends THREE.Group {
       firstPropellerGeometry,
       firstPropellerMaterial
     );
+    firstPropeller.castShadow = true;
     firstPropeller.position.set(0, 3.4, 0);
 
     return firstPropeller;
@@ -110,6 +117,7 @@ export class Airplane extends THREE.Group {
       secondPropellerGeometry,
       secondPropellerMaterial
     );
+    secondPropeller.castShadow = true;
     secondPropellerGeometry.scale(2.7, 0.3, 0.5);
     secondPropeller.position.set(0, 3.5, 0);
 

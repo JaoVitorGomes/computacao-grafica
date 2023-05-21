@@ -6,8 +6,10 @@ export class Tree extends THREE.Group {
     super();
 
     this.trunk = this.createTrunk(x, y, z);
-    this.firstLeaves = this.createLeaves(0, 2.4, 0);
-    this.secondLeaves = this.createLeaves(0, 3.6, 0);
+    // this.firstLeaves = this.createLeaves(0, 2.4, 0);
+    // this.secondLeaves = this.createLeaves(0, 3.6, 0);
+    this.firstLeaves = this.createLeaves(0, 2.2, 0);
+    this.secondLeaves = this.createLeaves(0, 3.4, 0);
 
     this.add(this.trunk);
     this.trunk.add(this.firstLeaves);
@@ -29,7 +31,7 @@ export class Tree extends THREE.Group {
   }
 
   createTrunk() {
-    const trunkGeometry = new CylinderGeometry(0.3, 0.3, 0.8);
+    const trunkGeometry = new CylinderGeometry(0.3, 0.3, 1.1);
 
     const trunkMaterial = new THREE.MeshPhongMaterial({
       color: 0x964b00,
