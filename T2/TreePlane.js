@@ -5,6 +5,7 @@ import {
   createGroundPlaneXZ,
 } from "../libs/util/util.js";
 import { Tree } from "./Tree.js";
+import { CylinderGeometry, BoxGeometry } from "../build/three.module.js";
 
 export class TreePlane extends THREE.Group {
   constructor(
@@ -26,9 +27,14 @@ export class TreePlane extends THREE.Group {
       position
     );
 
+    this.leftWall = this.createWall(color, height, [width / 2 + 5, 5, 0]);
+    this.rightWall = this.createWall(color, height, [-width / 2 - 5, 5, 0]);
+
     this.trees = this.createTrees(position[2] - height / 2);
 
     this.add(this.ground);
+    this.add(this.leftWall);
+    this.add(this.rightWall);
     this.trees.map((tree) => {
       this.add(tree);
     });
@@ -40,7 +46,7 @@ export class TreePlane extends THREE.Group {
   }
 
   getRandomX() {
-    return Math.floor(Math.random() * (60 / 3)) * 3 - 30;
+    return Math.floor(Math.random() * (50 / 3)) * 3 - 24;
   }
 
   generateXZPairs(maximumSize = 10, zStartPos = -120) {
@@ -104,5 +110,24 @@ export class TreePlane extends THREE.Group {
     console.log("PLANE -> ", plane);
 
     return plane;
+  }
+
+  createWall(color, depth, position) {
+    const wallGeometry = new BoxGeometry(10, 10, depth);
+
+    const wallMaterial = new THREE.MeshPhongMaterial({
+      color,
+      shininess: "200",
+    });
+
+    const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+    wall.castShadow = true;
+    wall.receiveShadow = true;
+
+    wall.side = THREE.DoubleSide;
+
+    wall.position.set(...position);
+
+    return wall;
   }
 }

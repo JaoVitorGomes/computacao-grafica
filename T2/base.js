@@ -32,9 +32,14 @@ material = setDefaultMaterial(); // create a basic material
 orbit = new OrbitControls(camera, renderer.domElement); // Enable mouse rotation, pan, zoom etc.
 document.addEventListener("mousemove", onDocumentMouseMove);
 
-let lightPosition = new THREE.Vector3(0.0, 25.0, -2.0);
+// let lightPosition = new THREE.Vector3(0.0, 25.0, -2.0);
+let lightPosition = new THREE.Vector3(-4.0, 10, -23.5);
 
 let lightSphere = createLightSphere(scene, 0.5, 10, 10, lightPosition);
+lightSphere.visible = false;
+
+let ambientLight = new THREE.AmbientLight("rgb(50, 50, 50)");
+scene.add(ambientLight);
 
 let dirLight = new THREE.DirectionalLight("whites", 2);
 dirLight.position.copy(lightPosition);
@@ -45,9 +50,9 @@ dirLight.shadow.mapSize.width = 16768;
 dirLight.shadow.mapSize.height = 16768;
 dirLight.shadow.camera.near = 0;
 dirLight.shadow.camera.far = 1024;
-dirLight.shadow.camera.left = -100;
-dirLight.shadow.camera.right = 100;
-dirLight.shadow.camera.top = 10;
+dirLight.shadow.camera.left = -1024;
+dirLight.shadow.camera.right = 1024;
+dirLight.shadow.camera.top = 1024;
 dirLight.shadow.camera.bottom = -1024;
 dirLight.name = "Direction Light";
 
@@ -61,17 +66,17 @@ scene.add(target);
 dirLight.target = target;
 
 // Change the position of the target to change the direction of the light
-target.position.set(dirLight.position.x, 0, dirLight.position.z);
+target.position.set(dirLight.position.x + 10, 0, dirLight.position.z + 10);
 
-// const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-//   lightPosition,
-//   dirLight.target.position,
-// ]);
+const lineTargetGeometry = new THREE.BufferGeometry().setFromPoints([
+  lightPosition,
+  dirLight.target.position,
+]);
 
-// const lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+const lineTargetMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
 
-// const line = new THREE.Line(lineGeometry, lineMaterial);
-// scene.add(line);
+const lineTarget = new THREE.Line(lineTargetGeometry, lineTargetMaterial);
+scene.add(lineTarget);
 
 let plane = 0;
 
@@ -375,7 +380,7 @@ function moveAirplane(obj) {
   obj.quaternion.slerp(quat, lerpConfig.alpha);
 
   lightPosition.x = obj.position.x;
-  lightPosition.z = obj.position.z;
+  lightPosition.z = obj.position.z - 23;
 
   updateLightPosition(lightPosition.x, lightPosition.y, lightPosition.z);
 }
@@ -388,9 +393,9 @@ function updateLightPosition(x, y, z) {
   dirLight.position.copy(lightPosition);
   lightSphere.position.copy(lightPosition);
 
-  // line.geometry.setFromPoints([lightPosition, dirLight.target.position]);
+  lineTarget.geometry.setFromPoints([lightPosition, dirLight.target.position]);
 
-  target.position.set(dirLight.position.x, 0, dirLight.position.z);
+  target.position.set(dirLight.position.x + 10, 0, dirLight.position.z + 10);
 
   console.log(
     "Light Position: " +
@@ -449,6 +454,7 @@ function keyboardUpdate() {
 }
 
 function render() {
+  keyboardUpdate();
   if (asset.object !== null) {
     if (start) {
       moveAirplane(asset.object);
