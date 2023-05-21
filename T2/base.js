@@ -72,6 +72,8 @@ let mira = new THREE.Vector3(0, 10, 30);
 
 let teste = 0;
 
+let velocidade = 1;
+
 let arrayPlane = new Array();
 
 let lookAtVec = new THREE.Vector3(0.0, 0.0, 0.0);
@@ -159,7 +161,7 @@ function loadGLBFile(asset, file, desiredScale)
    obj = fixPosition(obj);
    obj.updateMatrixWorld( true );
   // obj.rotateY(THREE.MathUtils.degToRad(180));
-  // obj.rotateX(THREE.MathUtils.degToRad(12));
+   obj.rotateX(THREE.MathUtils.degToRad(12));
    obj.position.set(0,10,0)
    scene.add ( obj );
    teste = obj.rotation.x
@@ -238,6 +240,24 @@ window.addEventListener("keydown", (event) => {
       instructions.style.display = '';
       body.style.cursor = 'auto';
   }
+  if (event.key == "1") {
+    velocidade = 1;
+    lerpConfig.alpha = 0.03;
+    lerpConfigCamera.alpha = 0.03;
+    lerpConfigPlaneRay.alpha = 0.03;
+  }
+  if (event.key == "2") {
+    velocidade = 2;
+    lerpConfig.alpha = 0.06;
+    lerpConfigCamera.alpha = 0.06;
+    lerpConfigPlaneRay.alpha = 0.06;
+    }
+  if (event.key == "3") {
+    velocidade = 3;
+    lerpConfig.alpha = 0.09;
+    lerpConfigCamera.alpha = 0.09;
+    lerpConfigPlaneRay.alpha = 0.09;
+  }
 });
 
 function mouseRotation() {
@@ -313,11 +333,11 @@ function modifyArray() {
 
 function moveAirplane(obj) {
   let verifyAngle = 1;
-  let diffDist = 1;
+  let diffDist = obj.position.x - lerpConfig.destination.x;
 
   rad = THREE.MathUtils.degToRad(diffDist * verifyAngle * 4);
   let quat = new THREE.Quaternion().setFromAxisAngle(
-    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 0, 1),
     rad
   );
 
@@ -326,10 +346,10 @@ function moveAirplane(obj) {
   planeRay.position.lerp(lerpConfigPlaneRay.destination, lerpConfigPlaneRay.alpha);
   lerpConfig.destination.x = valueX;
   lerpConfig.destination.y = valueY;
-  lerpConfig.destination.z += 2;
-  lerpConfigCamera.destination.z += 2;
-  lerpConfigPlaneRay.destination.z += 2;
-  //obj.quaternion.slerp(quat, lerpConfig.alpha);
+  lerpConfig.destination.z += 2*velocidade;
+  lerpConfigCamera.destination.z += 2*velocidade;
+  lerpConfigPlaneRay.destination.z += 2*velocidade;
+  obj.quaternion.slerp(quat, lerpConfig.alpha);
 }
 
 
