@@ -172,7 +172,7 @@ let asset = {
   bb: new THREE.Box3(),
 };
 
-loadGLBFile(asset, "../T2/aircraft.glb", 7.0);
+loadGLBFile(asset, "./aircraft.glb", 7.0);
 
 function loadGLBFile(asset, file, desiredScale) {
   let loader = new GLTFLoader();
