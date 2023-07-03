@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
+import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
 
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import { TrackballControls } from "../build/jsm/controls/TrackballControls.js";
@@ -172,10 +172,46 @@ let asset = {
   bb: new THREE.Box3(),
 };
 
-loadGLBFile(asset, "./aircraft.glb", 7.0);
+//loadGLBFile(asset, "../assets/objects/f16.obj", 7.0);
+
+// instantiate a loader
+const loader = new OBJLoader();
+
+// load a resource
+loader.load(
+	// resource URL
+	'../assets/objects/f16.obj',
+	// called when resource is loaded
+	function ( object ) {
+    let obj = object;
+
+    //obj = normalizeAndRescale(obj, desiredScale);
+    obj = fixPosition(obj);
+    obj.updateMatrixWorld(true);
+    // obj.rotateY(THREE.MathUtils.degToRad(180));
+    obj.position.set(0, 10, 0);
+    asset.object = obj;
+    console.log("obj-->",obj)
+		scene.add( obj );
+
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+
+		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+	},
+	// called when loading has errors
+	function ( error ) {
+
+		console.log( 'An error happened' );
+
+	}
+);
+
 
 function loadGLBFile(asset, file, desiredScale) {
-  let loader = new GLTFLoader();
+  let loader = new OBJLoader();
   loader.load(
     file,
     function (gltf) {
@@ -194,6 +230,7 @@ function loadGLBFile(asset, file, desiredScale) {
       scene.add(obj);
       teste = obj.rotation.x;
       asset.object = obj;
+      console.log("valor do obj-->",obj)
     },
     null,
     null
@@ -296,8 +333,8 @@ function mouseRotation() {
       asset.object.rotation.x +
         0.01 * (targetY - (teste - asset.object.rotation.x))
     );
-    asset.object.rotation.y -= 0.1 * (targetX + asset.object.rotation.y);
-    asset.object.rotation.x += 0.1 * (targetY - asset.object.rotation.x);
+    asset.object.rotation.y -= 0.001 * (targetX + asset.object.rotation.y);
+    asset.object.rotation.x += 0.001 * (targetY - asset.object.rotation.x);
   }
 }
 
