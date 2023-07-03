@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OBJLoader } from "../build/jsm/loaders/OBJLoader.js";
-
+import { MTLLoader } from "../build/jsm/loaders/MTLLoader.js";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import { TrackballControls } from "../build/jsm/controls/TrackballControls.js";
 import {
@@ -176,38 +176,40 @@ let asset = {
 
 // instantiate a loader
 const loader = new OBJLoader();
-
+const mtlLoader = new MTLLoader();
+mtlLoader.load(
+    '../assets/objects/f16.mtl',
+    (materials) => {
+        materials.preload()
+        console.log(materials)
+        loader.setMaterials(materials)
+        loader.load(
+          '../assets/objects/f16.obj',
+          function ( object ) {
+            let obj = object;
+            obj = fixPosition(obj);
+            obj.updateMatrixWorld(true);
+            obj.position.set(0, 10, 0);
+            asset.object = obj;
+            scene.add( obj );
+          },
+          function ( xhr ) {
+            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+          },
+          function ( error ) {
+            console.log( 'An error happened' );
+          }
+        );
+    },
+    (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+    (error) => {
+        console.log('An error happened')
+    }
+)
 // load a resource
-loader.load(
-	// resource URL
-	'../assets/objects/f16.obj',
-	// called when resource is loaded
-	function ( object ) {
-    let obj = object;
 
-    //obj = normalizeAndRescale(obj, desiredScale);
-    obj = fixPosition(obj);
-    obj.updateMatrixWorld(true);
-    // obj.rotateY(THREE.MathUtils.degToRad(180));
-    obj.position.set(0, 10, 0);
-    asset.object = obj;
-    console.log("obj-->",obj)
-		scene.add( obj );
-
-	},
-	// called when loading is in progresses
-	function ( xhr ) {
-
-		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-	},
-	// called when loading has errors
-	function ( error ) {
-
-		console.log( 'An error happened' );
-
-	}
-);
 
 
 function loadGLBFile(asset, file, desiredScale) {
