@@ -46,14 +46,14 @@ dirLight.position.copy(lightPosition);
 
 // Shadow settings
 dirLight.castShadow = true;
-dirLight.shadow.mapSize.width = 16768;
-dirLight.shadow.mapSize.height = 16768;
+dirLight.shadow.mapSize.width = 16;
+dirLight.shadow.mapSize.height = 16;
 dirLight.shadow.camera.near = 0;
-dirLight.shadow.camera.far = 1024;
-dirLight.shadow.camera.left = -1024;
-dirLight.shadow.camera.right = 1024;
-dirLight.shadow.camera.top = 1024;
-dirLight.shadow.camera.bottom = -1024;
+dirLight.shadow.camera.far = 1;
+dirLight.shadow.camera.left = -1;
+dirLight.shadow.camera.right = 1;
+dirLight.shadow.camera.top = 1;
+dirLight.shadow.camera.bottom = -1;
 dirLight.name = "Direction Light";
 
 scene.add(dirLight);
