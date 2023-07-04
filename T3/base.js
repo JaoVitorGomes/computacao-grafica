@@ -101,6 +101,7 @@ let teste = 0;
 let velocidade = 1;
 
 let arrayPlane = new Array();
+let arrayTiro = new Array();
 
 let lookAtVec = new THREE.Vector3(0.0, 0.0, 0.0);
 let camPosition = new THREE.Vector3(0, 0.0, 0);
@@ -181,7 +182,6 @@ mtlLoader.load(
     '../assets/objects/f16.mtl',
     (materials) => {
         materials.preload()
-        console.log(materials)
         loader.setMaterials(materials)
         loader.load(
           '../assets/objects/f16.obj',
@@ -297,6 +297,7 @@ window.addEventListener("click", (event) => {
   instructions.style.display = "none";
   blocker.style.display = "none";
   body.style.cursor = "none";
+  tiroAviao();
 });
 
 window.addEventListener("keydown", (event) => {
@@ -330,14 +331,34 @@ function mouseRotation() {
   targetX = mouseX * 0.001;
   targetY = mouseY * 0.001;
   if (asset.object && start) {
-    console.log(
-      "valores: ",
-      asset.object.rotation.x +
-        0.01 * (targetY - (teste - asset.object.rotation.x))
-    );
-    asset.object.rotation.y -= 0.001 * (targetX + asset.object.rotation.y);
-    asset.object.rotation.x += 0.001 * (targetY - asset.object.rotation.x);
+    asset.object.rotation.y -= 0.1 * (targetX + asset.object.rotation.y);
+    asset.object.rotation.x += 0.1 * (targetY - asset.object.rotation.x);
   }
+}
+
+function tiroAviao() {
+  
+  let cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+  let cube = new THREE.Mesh(cubeGeometry, material);
+  cube.position.set(asset.object.position.x,asset.object.position.y, asset.object.position.z);
+  cube.rotation.set(asset.object.rotation.x,asset.object.rotation.y,asset.object.rotation.z);
+  
+  scene.add(cube);
+  arrayTiro.push({tiro:cube, lerp:{destination: new THREE.Vector3(valueX, valueY, asset.object.position.z+50),alpha: 0.3,angle: 0.0,move: true}});
+  console.log("entrou no tiro->>",{tiro:cube, lerp:{destination: new THREE.Vector3(valueX, valueY, asset.object.position.z+100),alpha: 0.3,angle: 0.0,move: true}})
+}
+
+function updateTiro() {
+  for(let i =0; i < arrayTiro.length; i++){
+    arrayTiro[i].tiro.position.lerp(arrayTiro[i].lerp.destination, arrayTiro[i].lerp.alpha);
+    arrayTiro[i].lerp.destination.x += 2;
+    arrayTiro[i].lerp.destination.y += 2;
+    arrayTiro[i].lerp.destination.z += 2;
+
+
+    //pegar o eixo do raycaster e ir adiconando o z sozinho
+  }
+
 }
 
 // Use this to show information onscreen
@@ -436,14 +457,7 @@ function updateLightPosition(x, y, z) {
 
   target.position.set(dirLight.position.x + 10, 0, dirLight.position.z + 10);
 
-  console.log(
-    "Light Position: " +
-      lightPosition.x.toFixed(2) +
-      ", " +
-      lightPosition.y.toFixed(2) +
-      ", " +
-      lightPosition.z.toFixed(2)
-  );
+
 }
 
 function keyboardUpdate() {
@@ -494,6 +508,7 @@ function keyboardUpdate() {
 
 function render() {
   keyboardUpdate();
+  updateTiro();
   if (asset.object !== null) {
     if (start) {
       moveAirplane(asset.object);
