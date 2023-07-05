@@ -176,19 +176,43 @@ let asset = {
 //loadGLBFile(asset, "../assets/objects/f16.obj", 7.0);
 
 // instantiate a loader
+const loaderTexture = new THREE.TextureLoader();
 const loader = new OBJLoader();
 const mtlLoader = new MTLLoader();
 mtlLoader.load(
-    '../assets/objects/f16.mtl',
+    './Hawk_T2.mtl',
     (materials) => {
-        materials.preload()
-        loader.setMaterials(materials)
+        materials.preload();
+        loader.setMaterials(materials);
         loader.load(
-          '../assets/objects/f16.obj',
+          './Hawk_T2.obj',
           function ( object ) {
             let obj = object;
+
+            // obj.visible = true;
+
+            // obj.traverse( function (child)
+            // {
+            //   child.castShadow = true;
+            // });
+    
+            // obj.traverse( function( node )
+            // {
+            //   if( node.material ) node.material.side = THREE.DoubleSide;
+            // });
+            // var texture = new THREE.TextureLoader().load('./Diffuse.jpg');
+
+            // object.traverse(function (child) {   // aka setTexture
+            //     if (child instanceof THREE.Mesh) {
+            //         child.material.map = texture;
+            //     }
+            // });
+
+            obj = normalizeAndRescale(obj, 12.0);
             obj = fixPosition(obj);
             obj.updateMatrixWorld(true);
+
+
             obj.position.set(0, 10, 0);
             asset.object = obj;
             scene.add( obj );
@@ -197,7 +221,7 @@ mtlLoader.load(
             console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
           },
           function ( error ) {
-            console.log( 'An error happened' );
+            console.log( 'An error happened 1' );
           }
         );
     },
@@ -205,39 +229,12 @@ mtlLoader.load(
         console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
     },
     (error) => {
-        console.log('An error happened')
+        console.log('An error happened 2')
     }
 )
+
 // load a resource
 
-
-
-function loadGLBFile(asset, file, desiredScale) {
-  let loader = new OBJLoader();
-  loader.load(
-    file,
-    function (gltf) {
-      let obj = gltf.scene;
-      obj.traverse(function (child) {
-        if (child.isMesh) {
-          child.castShadow = true;
-        }
-      });
-      obj = normalizeAndRescale(obj, desiredScale);
-      obj = fixPosition(obj);
-      obj.updateMatrixWorld(true);
-      // obj.rotateY(THREE.MathUtils.degToRad(180));
-      obj.rotateX(THREE.MathUtils.degToRad(12));
-      obj.position.set(0, 10, 0);
-      scene.add(obj);
-      teste = obj.rotation.x;
-      asset.object = obj;
-      console.log("valor do obj-->",obj)
-    },
-    null,
-    null
-  );
-}
 
 function normalizeAndRescale(obj, newScale) {
   var scale = getMaxSize(obj); // Available in 'utils.js'
@@ -337,6 +334,10 @@ function mouseRotation() {
 }
 
 function tiroAviao() {
+  if (asset.object == null) {
+    return;
+  }
+
   
   let cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
   let cube = new THREE.Mesh(cubeGeometry, material);
@@ -345,7 +346,7 @@ function tiroAviao() {
   
   scene.add(cube);
   arrayTiro.push({tiro:cube, lerp:{destination: new THREE.Vector3(valueX, valueY, asset.object.position.z+50),alpha: 0.3,angle: 0.0,move: true}});
-  console.log("entrou no tiro->>",{tiro:cube, lerp:{destination: new THREE.Vector3(valueX, valueY, asset.object.position.z+100),alpha: 0.3,angle: 0.0,move: true}})
+ // console.log("entrou no tiro->>",{tiro:cube, lerp:{destination: new THREE.Vector3(valueX, valueY, asset.object.position.z+100),alpha: 0.3,angle: 0.0,move: true}})
 }
 
 function updateTiro() {
@@ -510,7 +511,7 @@ function render() {
   keyboardUpdate();
   updateTiro();
   if (asset.object !== null) {
-    if (start) {
+    if (start == 200) {
       moveAirplane(asset.object);
       line.position.set(mira.x, mira.y, planeRay.position.z);
     }
@@ -526,6 +527,6 @@ function render() {
     }
   }
   requestAnimationFrame(render);
-  renderer.render(scene, virtualCamera); // Render scene
+  renderer.render(scene, camera); // Render scene
   // renderer.render(scene, camera); // Render scene
 }
