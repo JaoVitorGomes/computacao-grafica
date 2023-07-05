@@ -96,7 +96,8 @@ let valueX = 0;
 
 let mira = new THREE.Vector3(0, 10, 30);
 
-let teste = 0;
+let obj;
+let cube;
 
 let velocidade = 1;
 
@@ -168,54 +169,112 @@ function RaycasterPlane() {
 
 // aircraft
 let asset = {
-  object: null,
+  object: new THREE.Group,
   loaded: false,
   bb: new THREE.Box3(),
 };
+let scale = 1;
+let previousScale = 0;
+let size = 5;
+let fwdValue = 0;
+let bkdValue = 0;
+let rgtValue = 0;
+let lftValue = 0;
+let tempVector = new THREE.Vector3();
+let upVector = new THREE.Vector3(0, 1, 0);
+
+
+function addJoysticks(){
+   
+  // Details in the link bellow:
+  // https://yoannmoi.net/nipplejs/
+
+  let joystickL = nipplejs.create({
+    zone: document.getElementById('joystickWrapper1'),
+    mode: 'static',
+    position: { top: '-80px', left: '80px' }
+  });
+  
+  joystickL.on('move', function (evt, data) {
+    const forward = data.vector.y
+    const turn = data.vector.x
+    fwdValue = bkdValue = lftValue = rgtValue = 0;
+
+    if (forward > 0) 
+      valueY = Math.abs(forward)
+    else if (forward < 0)
+      valueY = Math.abs(forward)
+
+    if (turn > 0) 
+      valueX = Math.abs(turn)
+    else if (turn < 0)
+      valueX = Math.abs(turn)
+  })
+
+  joystickL.on('end', function (evt) {
+    bkdValue = 0
+    fwdValue = 0
+    lftValue = 0
+    rgtValue = 0
+  })
+
+  let joystickR = nipplejs.create({
+    zone: document.getElementById('joystickWrapper2'),
+    mode: 'static',
+    lockY: true, // only move on the Y axis
+    position: { top: '-80px', right: '80px' },
+  });
+
+  joystickR.on('move', function (evt, data) {
+    const changeScale = data.vector.y;
+
+    if(changeScale > previousScale) scale+=0.1;
+    if(changeScale < previousScale) scale-=0.1;
+    if(scale > 4.0) scale = 4.0;
+    if(scale < 0.5) scale = 0.5;
+
+    previousScale = changeScale;
+  })
+}
+
 
 //loadGLBFile(asset, "../assets/objects/f16.obj", 7.0);
-
+addJoysticks();
 // instantiate a loader
-const loaderTexture = new THREE.TextureLoader();
 const loader = new OBJLoader();
-const mtlLoader = new MTLLoader();
-mtlLoader.load(
-    './Hawk_T2.mtl',
-    (materials) => {
-        materials.preload();
-        loader.setMaterials(materials);
+
         loader.load(
           './Hawk_T2.obj',
           function ( object ) {
-            let obj = object;
+            obj = object;
 
-            // obj.visible = true;
+            obj.visible = true;
 
-            // obj.traverse( function (child)
-            // {
-            //   child.castShadow = true;
-            // });
+            obj.traverse( function (child)
+            {
+              child.castShadow = true;
+            });
     
-            // obj.traverse( function( node )
-            // {
-            //   if( node.material ) node.material.side = THREE.DoubleSide;
-            // });
-            // var texture = new THREE.TextureLoader().load('./Diffuse.jpg');
+            obj.traverse( function( node )
+            {
+              if( node.material ) node.material.side = THREE.DoubleSide;
+            });
+            var texture = new THREE.TextureLoader().load('./Diffuse.jpg');
 
-            // object.traverse(function (child) {   // aka setTexture
-            //     if (child instanceof THREE.Mesh) {
-            //         child.material.map = texture;
-            //     }
-            // });
+            object.traverse(function (child) {   // aka setTexture
+                if (child instanceof THREE.Mesh) {
+                    child.material.map = texture;
+                }
+            });
 
             obj = normalizeAndRescale(obj, 12.0);
             obj = fixPosition(obj);
             obj.updateMatrixWorld(true);
+            
+            obj.position.set(0, 0, 0);
 
-
-            obj.position.set(0, 10, 0);
-            asset.object = obj;
-            scene.add( obj );
+            asset.object.add(obj);
+            scene.add( asset.object );
           },
           function ( xhr ) {
             console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -224,16 +283,6 @@ mtlLoader.load(
             console.log( 'An error happened 1' );
           }
         );
-    },
-    (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-    },
-    (error) => {
-        console.log('An error happened 2')
-    }
-)
-
-// load a resource
 
 
 function normalizeAndRescale(obj, newScale) {
@@ -338,24 +387,22 @@ function tiroAviao() {
     return;
   }
 
-  
-  let cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
-  let cube = new THREE.Mesh(cubeGeometry, material);
-  cube.position.set(asset.object.position.x,asset.object.position.y, asset.object.position.z);
+  let cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+  cube = new THREE.Mesh(cubeGeometry, material);
+  cube.position.set(asset.object.position.x,asset.object.position.y+1, asset.object.position.z);
   cube.rotation.set(asset.object.rotation.x,asset.object.rotation.y,asset.object.rotation.z);
-  
-  scene.add(cube);
-  arrayTiro.push({tiro:cube, lerp:{destination: new THREE.Vector3(valueX, valueY, asset.object.position.z+50),alpha: 0.3,angle: 0.0,move: true}});
+  obj.add(cube)
+  scene.add(asset.object);
+  arrayTiro.push({tiro:cube, lerp:{destination: new THREE.Vector3(0, 0, asset.object.position.z+50),alpha: 0.3,angle: 0.0,move: true}});
  // console.log("entrou no tiro->>",{tiro:cube, lerp:{destination: new THREE.Vector3(valueX, valueY, asset.object.position.z+100),alpha: 0.3,angle: 0.0,move: true}})
 }
 
 function updateTiro() {
   for(let i =0; i < arrayTiro.length; i++){
     arrayTiro[i].tiro.position.lerp(arrayTiro[i].lerp.destination, arrayTiro[i].lerp.alpha);
-    arrayTiro[i].lerp.destination.x += 2;
-    arrayTiro[i].lerp.destination.y += 2;
-    arrayTiro[i].lerp.destination.z += 2;
-
+    arrayTiro[i].lerp.destination.z += 3;
+    //cube.removeFromParent()
+    //scene.add(cube)
 
     //pegar o eixo do raycaster e ir adiconando o z sozinho
   }
@@ -393,8 +440,8 @@ function onDocumentMouseMove(event) {
     let point = intersects[0].point; // Pick the point where interception occurrs
     mira.set(point.x, point.y - 0.5, point.z);
     if (planeRay == intersects[0].object) {
-      valueX = point.x;
-      valueY = point.y;
+      //valueX = point.x;
+      //valueY = point.y;
     }
   }
 }
@@ -456,7 +503,7 @@ function updateLightPosition(x, y, z) {
 
   lineTarget.geometry.setFromPoints([lightPosition, dirLight.target.position]);
 
-  target.position.set(dirLight.position.x + 10, 0, dirLight.position.z + 10);
+  //target.position.set(dirLight.position.x + 10, 0, dirLight.position.z + 10);
 
 
 }
@@ -511,7 +558,7 @@ function render() {
   keyboardUpdate();
   updateTiro();
   if (asset.object !== null) {
-    if (start == 200) {
+    if (start) {
       moveAirplane(asset.object);
       line.position.set(mira.x, mira.y, planeRay.position.z);
     }
@@ -527,6 +574,6 @@ function render() {
     }
   }
   requestAnimationFrame(render);
-  renderer.render(scene, camera); // Render scene
+  renderer.render(scene, virtualCamera); // Render scene
   // renderer.render(scene, camera); // Render scene
 }

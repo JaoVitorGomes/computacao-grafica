@@ -74,7 +74,7 @@ let assetManager = {
    }
 }
 
-loadOBJFile('../assets/objects/', 'plane', 3.5, 0, true);
+loadOBJFile('../assets/objects/', 'Hawk_T2', 3.5, 0, true);
 loadOBJFile('../assets/objects/', 'L200', 2.5, 90, false);
 loadOBJFile('../assets/objects/', 'tank', 2.0, 90, false);
 
